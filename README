@@ -1,0 +1,10 @@
+
+Automated scripting tools to building up-to-date Ubuntu 16.04 vagrant box images.
+
+To compile it run: packer build template.json
+
+You can obtain the packer binary from https://www.packer.io/
+
+NOTE: This is based on https://github.com/hashicorp/atlas-packer-vagrant-tutorial.
+
+
