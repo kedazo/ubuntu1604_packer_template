@@ -39,4 +39,6 @@ GRUB_CMDLINE_LINUX_DEFAULT="quiet"
 GRUB_CMDLINE_LINUX="debian-installer=en_US"
 EOF
 
+echo "vagrant ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
+
 update-grub
