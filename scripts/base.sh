@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#perl -p -i -e 's#http://us.archive.ubuntu.com/ubuntu#http://mirror.rackspace.com/ubuntu#gi' /etc/apt/sources.list
-
 # update source list
 cat <<EOF > /etc/apt/sources.list
 deb http://hu.archive.ubuntu.com/ubuntu/ xenial main restricted universe multiverse
@@ -22,12 +20,13 @@ EOF
 
 # Update the box
 apt-get -y -q update
-apt-get -y -q install facter linux-headers-$(uname -r) build-essential zlib1g-dev libssl-dev libreadline-gplv2-dev curl unzip
+apt-get -y -q install facter linux-headers-$(uname -r) build-essential zlib1g-dev libssl-dev libreadline-gplv2-dev curl unzip biosdevname
 
 # Tweak sshd to prevent DNS resolution (speed up logins)
 echo 'UseDNS no' >> /etc/ssh/sshd_config
 
 # Remove 5s grub timeout to speed up booting
+# and revert to plain old network interface naming
 cat <<EOF > /etc/default/grub
 # If you change this file, run 'update-grub' afterwards to update
 # /boot/grub/grub.cfg.
@@ -36,9 +35,28 @@ GRUB_DEFAULT=0
 GRUB_TIMEOUT=0
 GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
 GRUB_CMDLINE_LINUX_DEFAULT="quiet"
-GRUB_CMDLINE_LINUX="debian-installer=en_US"
+GRUB_CMDLINE_LINUX="debian-installer=en_US net.ifnames=0 biosdevname=0"
 EOF
-
-echo "vagrant ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
-
 update-grub
+
+# and create interfaces extension for eth0/eth1:
+mkdir -p /etc/network/interfaces.d
+cat <<EOF > /etc/network/interfaces.d/eth0eth1
+auto eth0
+iface eth0 inet dhcp
+pre-up sleep 2
+
+auto eth1
+iface eth1 inet dhcp
+pre-up sleep 2
+EOF
+chmod a+r /etc/network/interfaces.d/eth0eth1
+
+# sudo users
+sed -i -e '/Defaults\s\+env_reset/a Defaults\texempt_group=sudo' /etc/sudoers
+sed -i -e 's/%sudo  ALL=(ALL:ALL) ALL/%sudo  ALL=NOPASSWD:ALL/g' /etc/sudoers
+
+# vagrant user
+echo "vagrant ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
+echo "Defaults:vagrant !requiretty" | tee -a /etc/sudoers
+
