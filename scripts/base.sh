@@ -40,17 +40,16 @@ EOF
 update-grub
 
 # and create interfaces extension for eth0/eth1:
-mkdir -p /etc/network/interfaces.d
-cat <<EOF > /etc/network/interfaces.d/eth0eth1
+cat <<EOF >> /etc/network/interfaces
 auto eth0
 iface eth0 inet dhcp
-pre-up sleep 2
 
 auto eth1
-iface eth1 inet dhcp
-pre-up sleep 2
+iface eth1 inet manual
 EOF
-chmod a+r /etc/network/interfaces.d/eth0eth1
+
+# remove the new/strange eth iface names
+sed -i.bak '/.*enp0s3.*/d' /etc/network/interfaces
 
 # sudo users
 sed -i -e '/Defaults\s\+env_reset/a Defaults\texempt_group=sudo' /etc/sudoers
