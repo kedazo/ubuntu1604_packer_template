@@ -49,7 +49,7 @@ iface eth1 inet manual
 EOF
 
 # remove the new/strange eth iface names
-sed -i.bak '/.*enp0s3.*/d' /etc/network/interfaces
+sed -i.bak '/.*enp.*/d' /etc/network/interfaces
 
 # sudo users
 sed -i -e '/Defaults\s\+env_reset/a Defaults\texempt_group=sudo' /etc/sudoers
